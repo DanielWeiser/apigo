@@ -2160,7 +2160,7 @@ func TestClient_OrderPaymentEdit(t *testing.T) {
 	}
 
 	gock.New(crmURL).
-		Post(fmt.Sprintf("/orders/payments/%s/edit", payment.ExternalID)).
+		Post(fmt.Sprintf("/orders/payments/%s/edit", "asdasd")).
 		MatchType("url").
 		BodyString(p.Encode()).
 		Reply(200).
