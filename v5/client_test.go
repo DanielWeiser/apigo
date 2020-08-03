@@ -2148,7 +2148,6 @@ func TestClient_OrderChange_Fail(t *testing.T) {
 func TestClient_OrderPaymentEdit(t *testing.T) {
 	c := client()
 	payment = Payment{
-		ID:         RandomString(8),
 		ExternalID: RandomString(8),
 	}
 
