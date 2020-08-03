@@ -2147,7 +2147,7 @@ func TestClient_OrderChange_Fail(t *testing.T) {
 
 func TestClient_OrderPaymentEdit(t *testing.T) {
 	c := client()
-	payment = Payment{
+	payment := Payment{
 		ExternalID: RandomString(8),
 	}
 
