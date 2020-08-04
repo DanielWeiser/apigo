@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -368,7 +369,7 @@ func TestClient_CustomerChange(t *testing.T) {
 		t.Errorf("%v", err.ApiError())
 	}
 
-	if data.Customer.Tags != f.Tags {
+	if !reflect.DeepEqual(data.Customer.Tags, f.Tags) {
 		t.Errorf("%v", err.ApiError())
 	}
 }
