@@ -341,15 +341,17 @@ func TestClient_CustomerChange(t *testing.T) {
 		Get(fmt.Sprintf("/api/v5/customers/%v", f.ExternalID)).
 		MatchParam("by", ByExternalID).
 		Reply(200).
-		BodyString(`{"success": true, "Tags": {
-				"name": "first",
-				"color": "#3e89b6",
-				"attached": false
-			},
-			{
-				"name": "second",
-				"color": "#ffa654",
-				"attached": false
+		BodyString(`{"success": true, "customer": {
+				"tags": {
+					"name": "first",
+					"color": "#3e89b6",
+					"attached": false
+				},
+				{
+					"name": "second",
+					"color": "#ffa654",
+					"attached": false
+				}
 			}
 		}`)
 
@@ -366,7 +368,7 @@ func TestClient_CustomerChange(t *testing.T) {
 		t.Errorf("%v", err.ApiError())
 	}
 
-	if data.Tags != f.Tags {
+	if data.Customer.Tags != f.Tags {
 		t.Errorf("%v", err.ApiError())
 	}
 }
