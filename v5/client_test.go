@@ -273,6 +273,10 @@ func TestClient_CustomerChange(t *testing.T) {
 			Street:   "Кутузовский",
 			Building: "14",
 		},
+		Tags: []Tag{
+			{"first", "#3e89b6", false},
+			{"second", "#ffa654", false},
+		},
 	}
 
 	defer gock.Off()
@@ -337,7 +341,17 @@ func TestClient_CustomerChange(t *testing.T) {
 		Get(fmt.Sprintf("/api/v5/customers/%v", f.ExternalID)).
 		MatchParam("by", ByExternalID).
 		Reply(200).
-		BodyString(`{"success": true}`)
+		BodyString(`{"success": true, "tags": {
+				"name": "first",
+				"color": "#3e89b6",
+				"attached": false
+			},
+			{
+				"name": "second",
+				"color": "#ffa654",
+				"attached": false
+			}
+		}`)
 
 	data, status, err := c.Customer(f.ExternalID, ByExternalID, "")
 	if err.Error() != "" {
@@ -349,6 +363,10 @@ func TestClient_CustomerChange(t *testing.T) {
 	}
 
 	if data.Success != true {
+		t.Errorf("%v", err.ApiError())
+	}
+
+	if data.Tags != f.Tags {
 		t.Errorf("%v", err.ApiError())
 	}
 }
@@ -2145,41 +2163,6 @@ func TestClient_OrderChange_Fail(t *testing.T) {
 	}
 }
 
-func TestClient_OrderPaymentEdit(t *testing.T) {
-	c := client()
-	payment := Payment{
-		ExternalID: RandomString(8),
-	}
-
-	defer gock.Off()
-
-	jr, _ := json.Marshal(&payment)
-	p := url.Values{
-		"by":      {"externalId"},
-		"payment": {string(jr[:])},
-	}
-
-	gock.New(crmURL).
-		Post(fmt.Sprintf("/orders/payments/%s/edit", "asdasd")).
-		MatchType("url").
-		BodyString(p.Encode()).
-		Reply(200).
-		BodyString(`{"success": true}`)
-
-	data, status, err := c.OrderPaymentEdit(payment, "externalId")
-	if err.Error() != "" {
-		t.Errorf("%v", err.Error())
-	}
-
-	if status >= http.StatusBadRequest {
-		t.Errorf("%v", err.ApiError())
-	}
-
-	if data.Success != true {
-		t.Errorf("%v", err.ApiError())
-	}
-}
-
 func TestClient_OrdersUpload(t *testing.T) {
 	c := client()
 	orders := make([]Order, 3)
@@ -3265,6 +3248,41 @@ func TestClient_OrderMethods(t *testing.T) {
 	}
 
 	if st != http.StatusOK {
+		t.Errorf("%v", err.ApiError())
+	}
+
+	if data.Success != true {
+		t.Errorf("%v", err.ApiError())
+	}
+}
+
+func TestClient_OrderPaymentEdit(t *testing.T) {
+	c := client()
+	payment := Payment{
+		ExternalID: RandomString(8),
+	}
+
+	defer gock.Off()
+
+	jr, _ := json.Marshal(&payment)
+	p := url.Values{
+		"by":      {"externalId"},
+		"payment": {string(jr[:])},
+	}
+
+	gock.New(crmURL).
+		Post(fmt.Sprintf("/orders/payments/%s/edit", payment.ExternalID)).
+		MatchType("url").
+		BodyString(p.Encode()).
+		Reply(200).
+		BodyString(`{"success": true}`)
+
+	data, status, err := c.OrderPaymentEdit(payment, "externalId")
+	if err.Error() != "" {
+		t.Errorf("%v", err.Error())
+	}
+
+	if status >= http.StatusBadRequest {
 		t.Errorf("%v", err.ApiError())
 	}
 
