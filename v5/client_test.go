@@ -343,7 +343,7 @@ func TestClient_CustomerChange(t *testing.T) {
 		MatchParam("by", ByExternalID).
 		Reply(200).
 		BodyString(`{"success": true, "customer": {
-				"tags": {
+				"tags": [{
 					"name": "first",
 					"color": "#3e89b6",
 					"attached": false
@@ -352,7 +352,7 @@ func TestClient_CustomerChange(t *testing.T) {
 					"name": "second",
 					"color": "#ffa654",
 					"attached": false
-				}
+				}]
 			}
 		}`)
 
