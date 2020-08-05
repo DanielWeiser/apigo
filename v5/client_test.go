@@ -6640,7 +6640,7 @@ func TestClient_OrderDeliveryData(t *testing.T) {
 		},
 	}
 	data, _ := json.Marshal(d)
-	expected := "{\"firstName\":\"Василий\",\"lastName\":\"Пупкин\"}"
+	expected := `{"payerType":"type","pickuppointAddress":"address","status":"status","trackNumber":"track"}`
 	if string(data) != expected {
 		t.Error("error")
 	}
