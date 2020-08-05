@@ -6675,6 +6675,6 @@ func TestClient_OrderDeliveryData(t *testing.T) {
 
 	eq := reflect.DeepEqual(expected, d)
 	if eq != true {
-		t.Error("error")
+		t.Errorf("Unmarshaled: %#v\n", d)
 	}
 }
