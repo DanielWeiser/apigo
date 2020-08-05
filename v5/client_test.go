@@ -6642,7 +6642,7 @@ func TestClient_OrderDeliveryData(t *testing.T) {
 	data, _ := json.Marshal(d)
 	expected := "{\"firstName\":\"Василий\",\"lastName\":\"Пупкин\"}"
 	if string(data) != expected {
-		t.Errorf("%+v", eq)
+		t.Error("error")
 	}
 
 	fmt.Printf("######################################################################################\n")
