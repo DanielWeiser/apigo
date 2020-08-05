@@ -383,7 +383,7 @@ func (v *OrderDeliveryData) UnmarshalJSON(b []byte) error {
 		field := object.Field(i)
 
 		if i, ok := field.Tag.Lookup("json"); ok {
-			delete(additionalData, i)
+			delete(additionalData, i[:len(i)-10])
 		} else {
 			delete(additionalData, field.Name)
 		}
