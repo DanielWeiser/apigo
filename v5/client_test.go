@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -274,10 +273,6 @@ func TestClient_CustomerChange(t *testing.T) {
 			Street:   "Кутузовский",
 			Building: "14",
 		},
-		Tags: []Tag{
-			{"first", "#3e89b6", false},
-			{"second", "#ffa654", false},
-		},
 	}
 
 	defer gock.Off()
@@ -342,23 +337,7 @@ func TestClient_CustomerChange(t *testing.T) {
 		Get(fmt.Sprintf("/api/v5/customers/%v", f.ExternalID)).
 		MatchParam("by", ByExternalID).
 		Reply(200).
-		BodyString(`{
-			"success": true, 
-			"customer": {
-				"tags": [
-					{
-						"name": "first",
-						"color": "#3e89b6",
-						"attached": false
-					},
-					{
-						"name": "second",
-						"color": "#ffa654",
-						"attached": false
-					}
-				]
-			}
-		}`)
+		BodyString(`{"success": true}`)
 
 	data, status, err := c.Customer(f.ExternalID, ByExternalID, "")
 	if err.Error() != "" {
@@ -370,10 +349,6 @@ func TestClient_CustomerChange(t *testing.T) {
 	}
 
 	if data.Success != true {
-		t.Errorf("%v", err.ApiError())
-	}
-
-	if !reflect.DeepEqual(data.Customer.Tags, f.Tags) {
 		t.Errorf("%v", err.ApiError())
 	}
 }
@@ -3255,41 +3230,6 @@ func TestClient_OrderMethods(t *testing.T) {
 	}
 
 	if st != http.StatusOK {
-		t.Errorf("%v", err.ApiError())
-	}
-
-	if data.Success != true {
-		t.Errorf("%v", err.ApiError())
-	}
-}
-
-func TestClient_OrderPaymentEdit(t *testing.T) {
-	c := client()
-	payment := Payment{
-		ExternalID: RandomString(8),
-	}
-
-	defer gock.Off()
-
-	jr, _ := json.Marshal(&payment)
-	p := url.Values{
-		"by":      {"externalId"},
-		"payment": {string(jr[:])},
-	}
-
-	gock.New(crmURL).
-		Post(fmt.Sprintf("/orders/payments/%s/edit", payment.ExternalID)).
-		MatchType("url").
-		BodyString(p.Encode()).
-		Reply(200).
-		BodyString(`{"success": true}`)
-
-	data, status, err := c.OrderPaymentEdit(payment, "externalId")
-	if err.Error() != "" {
-		t.Errorf("%v", err.Error())
-	}
-
-	if status >= http.StatusBadRequest {
 		t.Errorf("%v", err.ApiError())
 	}
 
@@ -6688,4 +6628,32 @@ func TestClient_CustomFieldsCreate_Fail(t *testing.T) {
 	if customFieldEdit.Success != false {
 		t.Error(successFail)
 	}
+}
+
+func TestClient_OrderDeliveryData(t *testing.T) {
+	d := OrderDeliveryData{
+		OrderDeliveryDataBasic: {
+			RandomString(8),
+			RandomString(8),
+			RandomString(8),
+			RandomString(8),
+		},
+	}
+	data, _ := json.Marshal(d)
+	fmt.Printf("######################################################################################\n")
+	fmt.Printf("Testing with this item: %#v\n", d)
+	fmt.Printf("Result: %s\n", data)
+
+	d.AdditionalFields = map[string]interface{}{
+		"customFirst":  "one",
+		"customSecond": "two",
+	}
+
+	fmt.Printf("With custom fields: %#v\n", d)
+	data, _ = json.Marshal(d)
+	fmt.Printf("Result with customs: %s\n", data)
+
+	d = OrderDeliveryData{}
+	json.Unmarshal(data, &d)
+	fmt.Printf("Unmarshaled: %#v\n", d)
 }

@@ -1,6 +1,10 @@
 package v5
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+	"reflect"
+)
 
 // ByID is "id" constant to use as `by` property in methods
 const ByID = "id"
@@ -149,7 +153,6 @@ type Customer struct {
 	MgCustomerID                 string            `json:"mgCustomerId,omitempty"`
 	PhotoURL                     string            `json:"photoUrl,omitempty"`
 	CustomFields                 map[string]string `json:"customFields,omitempty,brackets"`
-	Tags                         []Tag             `json:"tags,brackets,omitempty"`
 }
 
 // CorporateCustomer type
@@ -355,12 +358,52 @@ type OrderDeliveryService struct {
 	Active bool   `json:"active,omitempty"`
 }
 
-// OrderDeliveryData type
-type OrderDeliveryData struct {
+// OrderDeliveryDataBasic type
+type OrderDeliveryDataBasic struct {
 	TrackNumber        string `json:"trackNumber,omitempty"`
 	Status             string `json:"status,omitempty"`
 	PickuppointAddress string `json:"pickuppointAddress,omitempty"`
 	PayerType          string `json:"payerType,omitempty"`
+}
+
+// OrderDeliveryData type
+type OrderDeliveryData struct {
+	OrderDeliveryDataBasic
+	AdditionalFields map[string]interface{}
+}
+
+// UnmarshalJSON method
+func (v *OrderDeliveryData) UnmarshalJSON(b []byte) error {
+	var additionalData map[string]interface{}
+	json.Unmarshal(b, &additionalData)
+	json.Unmarshal(b, &v.OrderDeliveryDataBasic)
+	object := reflect.TypeOf(v.OrderDeliveryDataBasic)
+
+	for i := 0; i < object.NumField(); i++ {
+		field := object.Field(i)
+
+		if i, ok := field.Tag.Lookup("json"); ok {
+			delete(additionalData, i)
+		} else {
+			delete(additionalData, field.Name)
+		}
+	}
+
+	v.AdditionalFields = additionalData
+	return nil
+}
+
+// MarshalJSON method
+func (v OrderDeliveryData) MarshalJSON() ([]byte, error) {
+	result := map[string]interface{}{}
+	data, _ := json.Marshal(v.OrderDeliveryDataBasic)
+	json.Unmarshal(data, &result)
+
+	for key, value := range v.AdditionalFields {
+		result[key] = value
+	}
+
+	return json.Marshal(result)
 }
 
 // OrderMarketplace type
@@ -1101,11 +1144,4 @@ type Element struct {
 type Activity struct {
 	Active bool `json:"active"`
 	Freeze bool `json:"freeze"`
-}
-
-// Tag struct
-type Tag struct {
-	Name     string `json:"name,omitempty"`
-	Color    string `json:"color,omitempty"`
-	Attached bool   `json:"attached,omitempty"`
 }
