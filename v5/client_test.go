@@ -6632,7 +6632,7 @@ func TestClient_CustomFieldsCreate_Fail(t *testing.T) {
 
 func TestClient_OrderDeliveryData(t *testing.T) {
 	d := OrderDeliveryData{
-		OrderDeliveryDataBasic: {
+		OrderDeliveryDataBasic: OrderDeliveryDataBasic{
 			RandomString(8),
 			RandomString(8),
 			RandomString(8),
