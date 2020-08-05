@@ -6633,13 +6633,18 @@ func TestClient_CustomFieldsCreate_Fail(t *testing.T) {
 func TestClient_OrderDeliveryData(t *testing.T) {
 	d := OrderDeliveryData{
 		OrderDeliveryDataBasic: OrderDeliveryDataBasic{
-			RandomString(8),
-			RandomString(8),
-			RandomString(8),
-			RandomString(8),
+			"track",
+			"status",
+			"address",
+			"type",
 		},
 	}
 	data, _ := json.Marshal(d)
+	expected := "{\"firstName\":\"Василий\",\"lastName\":\"Пупкин\"}"
+	if string(data) != expected {
+		t.Errorf("%+v", eq)
+	}
+
 	fmt.Printf("######################################################################################\n")
 	fmt.Printf("Testing with this item: %#v\n", d)
 	fmt.Printf("Result: %s\n", data)
