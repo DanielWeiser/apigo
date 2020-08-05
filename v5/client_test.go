@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -6645,20 +6646,34 @@ func TestClient_OrderDeliveryData(t *testing.T) {
 		t.Error("error")
 	}
 
-	fmt.Printf("######################################################################################\n")
-	fmt.Printf("Testing with this item: %#v\n", d)
-	fmt.Printf("Result: %s\n", data)
-
 	d.AdditionalFields = map[string]interface{}{
 		"customFirst":  "one",
 		"customSecond": "two",
 	}
 
-	fmt.Printf("With custom fields: %#v\n", d)
 	data, _ = json.Marshal(d)
-	fmt.Printf("Result with customs: %s\n", data)
+	expected := `{"customFirst":"one","customSecond":"two","payerType":"type","pickuppointAddress":"address","status":"status","trackNumber":"track"}`
+	if string(data) != expected {
+		t.Error("error")
+	}
 
 	d = OrderDeliveryData{}
 	json.Unmarshal(data, &d)
-	fmt.Printf("Unmarshaled: %#v\n", d)
+	expected := OrderDeliveryData{
+		OrderDeliveryDataBasic: OrderDeliveryDataBasic{
+			"track",
+			"status",
+			"address",
+			"type",
+		},
+		AdditionalFields: map[string]interface{}{
+			"customFirst":  "one",
+			"customSecond": "two",
+		},
+	}
+
+	eq := reflect.DeepEqual(expected, d)
+	if eq != true {
+		t.Error("error")
+	}
 }
